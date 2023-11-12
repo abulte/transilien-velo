@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>transilien-velo</title>
+  <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+
+<body>
+  <h1>transilien-velo</h1>
+  <form hx-post="/search" hx-target="#search-results">
+    <input required id="departure" name="departure" type="text" value="1 rue maryse bastié, poissy" />
+    <button type="button" id="switchButton" onclick="switchInputs()">🔄</button>
+    <input required id="arrival" name="arrival" type="text" value="rue beaurepaire, paris" />
+    <button type="submit">Chercher</button>
+    <div>
+      <input type="datetime-local" name="datetime" id="datetime" />
+      <label class="inline-block">
+        <input type="radio" name="dt_type" value="departure" checked />
+        Départ
+      </label>
+      <label class="inline-block">
+        <input type="radio" name="dt_type" value="arrival" />
+        Arrivée
+      </label>
+      <span class="inline-block">
+        <input type="checkbox" name="authorize_bus" id="authorize_bus" />
+        <label for="authorize_bus">Autoriser les bus</label>
+      </span>
+    </div>
+    {% if request.args.test %}
+      <input type="hidden" name="test" value="{{ request.args.test }}" />
+    {% endif %}
+    <div class="htmx-indicator">Chargement...</div>
+  </form>
+  <div id="search-results"></div>
+  <script src="https://unpkg.com/htmx.org@1.9.8"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

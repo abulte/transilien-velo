@@ -1,0 +1,18 @@
+{% from "macros.html.j2" import process_type with context %}
+
+{% for journey in data.journeys %}
+<strong>
+  {{ journey.departure_date_time | datetime }} - {{ journey.arrival_date_time | datetime }} - {{ journey.duration | duration }}
+</strong>
+<table>
+  {% for section in journey.sections  %}
+  <tr>
+    <td>{{ section.departure_date_time | datetime }}</td>
+    <td>{{ section.arrival_date_time | datetime }}</td>
+    <td>{{ process_type(section) }}</td>
+    <td>{{ section.get("from", {}).name }}</td>
+    <td>{{ section.get("to", {}).name }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endfor %}

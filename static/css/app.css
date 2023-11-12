@@ -1,0 +1,32 @@
+.picto {
+  vertical-align: middle;
+  height: 1.6em;
+}
+
+@media (prefers-color-scheme: dark) {
+  .picto {
+    background-color: white;
+  }
+}
+
+.with-bg-color {
+  display: inline-block;
+  border: none;
+  border-radius: 3em;
+  text-align: center;
+  line-height: 1.2em;
+  min-width: 1.6em;
+  padding: 0.2em 0.3em;
+}
+
+.pm_container {
+  min-width: 64px;
+}
+
+#switchButton {
+  background-color: white;
+}
+
+.inline-block {
+  display: inline-block;
+}

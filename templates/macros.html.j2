@@ -1,0 +1,51 @@
+{% macro physical_mode_picto(links) -%}
+  {% set pm = links | selectattr("type", "equalto", "physical_mode") | map(attribute="id") | first %}
+  {% set pm_src = "img/pictos/" ~ pm_imgs[pm] ~ ".svg" %}
+  <img class="picto" src="{{ url_for('static', filename=pm_src) }}">
+{%- endmacro %}
+
+{% macro mode_picto(mode) -%}
+  {% set picto_path = "img/pictos/" ~ mode_imgs[mode] ~ ".svg" %}
+  <img class="picto" src="{{ url_for('static', filename=picto_path) }}">
+{%- endmacro %}
+
+{% macro line_picto(display_informations) -%}
+  <span
+    class="with-bg-color"
+    style="background-color: #{{ display_informations.color }}; color: #{{ display_informations.text_color }};"
+  >
+    {{ display_informations.code }}
+  </span>
+{%- endmacro %}
+
+{# https://github.com/TeXitoi/navitia-playground/blob/9ff73735e264232ea9176a68f059587f09b4a31b/js/summary.js#L272C31-L272C31 #}
+{% macro process_type(section) -%}
+  {% if section.type == "street_network" %}
+    {{ mode_picto(section.mode) }}
+  {% elif section.type == "bss_rent" %}
+    {{ mode_picto("bss") }} {{ mode_picto("exit") }}
+  {% elif section.type == "bss_put_back" %}
+    {{ mode_picto("bss") }} {{ mode_picto("entrance") }}
+  {% elif section.type == "transfer" %}
+    {% if section.transfer_type == "walking" %}
+      {{ mode_picto("walking") }}
+    {% else %}
+      {{ section.transfer_type }}
+    {% endif %}
+  {% elif section.type == "public_transport" %}
+    <div class="pm_container">
+    {% if section.links %}{{ physical_mode_picto(section.links) }}{% endif %}
+    {% if section.get("display_informations", {}).code %}
+      {{ line_picto(section.display_informations) }}
+    {% endif %}
+    </div>
+  {% elif section.type == "crow_fly" %}
+    {% if section.duration %}
+      {{ mode_picto(section.mode) }} ({{ section.type }})
+    {% else %}
+      {{ section.type }}
+    {% endif %}
+  {% else %}
+    {{ section.type }}
+  {% endif %}
+{%- endmacro %}
