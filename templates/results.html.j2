@@ -1,18 +1,21 @@
-{% from "macros.html.j2" import process_type with context %}
+{% from "macros.html.j2" import process_type, make_summary with context %}
 
 {% for journey in data.journeys %}
-<strong>
-  {{ journey.departure_date_time | datetime }} - {{ journey.arrival_date_time | datetime }} - {{ journey.duration | duration }}
-</strong>
-<table>
-  {% for section in journey.sections  %}
-  <tr>
-    <td>{{ section.departure_date_time | datetime }}</td>
-    <td>{{ section.arrival_date_time | datetime }}</td>
-    <td>{{ process_type(section) }}</td>
-    <td>{{ section.get("from", {}).name }}</td>
-    <td>{{ section.get("to", {}).name }}</td>
-  </tr>
-  {% endfor %}
-</table>
+<details>
+  <summary>{{ make_summary(journey) }}</summary>
+  <div>
+    <img class="picto" src="{{ url_for('static', filename='img/duration.svg') }}">{{ journey.duration | duration }}
+  </div>
+  <table>
+    {% for section in journey.sections  %}
+    <tr>
+      <td>{{ section.departure_date_time | datetime }}</td>
+      <td>{{ section.arrival_date_time | datetime }}</td>
+      <td>{{ process_type(section) }}</td>
+      <td>{{ section.get("from", {}).name }}</td>
+      <td>{{ section.get("to", {}).name }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</details>
 {% endfor %}

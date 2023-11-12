@@ -18,6 +18,61 @@
   </span>
 {%- endmacro %}
 
+{# https://github.com/TeXitoi/navitia-playground/blob/9ff73735e264232ea9176a68f059587f09b4a31b/js/summary.js#L58 #}
+{% macro make_summary(journey) -%}
+
+{% set ns = namespace(
+  last_section_mode=None,
+  first_section_mode=None,
+  stay_in=False,
+) %}
+
+{# compute first_section_mode and last_section_mode #}
+{% for section in journey.sections %}
+  {% if section.type in ["public_transport", "on_demand_transport"] %}
+    {% if not ns.first_section_mode %}
+      {% set ns.first_section_mode = ns.last_section_mode %}
+    {% endif %}
+    {% set ns.last_section_mode = None %}
+  {% elif section.type in ["crow_fly", "street_network"] %}
+    {% if section.duration %}
+      {% if section.mode == "bike"  %}
+        {% set ns.last_section_mode = "bike" %}
+      {% elif section.mode == "walking" %}
+        {% if not ns.last_section_mode  %}
+          {% set ns.last_section_mode = "walking" %}
+        {% endif %}
+      {% endif %}
+    {% endif %}
+  {% elif section.type in ["bss_rent", "bss_put_back"] %}
+    {% set ns.last_section_mode = "bss" %}
+  {% endif %}
+{% endfor %}
+
+{# display infos #}
+{{ journey.departure_date_time | datetime }}
+
+{{ mode_picto(ns.first_section_mode) }} >
+
+{# compute legs between first and last #}
+{% for section in journey.sections %}
+  {% if section.type == "transfer" and section.transfer_type == "stay_in" %}
+    {% set ns.stay_in = True %}
+  {% endif %}
+  {% if section.type in ["public_transport", "on_demand_transport"] %}
+    {% if ns.stay_in %}
+      {{ physical_mode_picto(section.links) }} >
+      {% set ns.stay_in = False %}
+    {% else %}
+      {{ physical_mode_picto(section.links) }} {{ line_picto(section.display_informations) }} >
+    {% endif %}
+  {% endif %}
+{% endfor %}
+
+{{ mode_picto(ns.last_section_mode) }}
+{{ journey.arrival_date_time | datetime }}
+{%- endmacro %}
+
 {# https://github.com/TeXitoi/navitia-playground/blob/9ff73735e264232ea9176a68f059587f09b4a31b/js/summary.js#L272C31-L272C31 #}
 {% macro process_type(section) -%}
   {% if section.type == "street_network" %}
@@ -34,10 +89,12 @@
     {% endif %}
   {% elif section.type == "public_transport" %}
     <div class="pm_container">
-    {% if section.links %}{{ physical_mode_picto(section.links) }}{% endif %}
-    {% if section.get("display_informations", {}).code %}
-      {{ line_picto(section.display_informations) }}
-    {% endif %}
+      {% if section.links %}
+        {{ physical_mode_picto(section.links) }}
+      {% endif %}
+      {% if section.get("display_informations", {}).code %}
+        {{ line_picto(section.display_informations) }}
+      {% endif %}
     </div>
   {% elif section.type == "crow_fly" %}
     {% if section.duration %}
